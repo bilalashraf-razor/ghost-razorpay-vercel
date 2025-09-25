@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
       const ghostAPI = new GhostAdminAPI({
         url: process.env.GHOST_URL,
         key: process.env.GHOST_ADMIN_API_KEY,
-        version: 'v5.0'
+        version: 'v6.0'
       });
 
       // Extract customer info from payment
