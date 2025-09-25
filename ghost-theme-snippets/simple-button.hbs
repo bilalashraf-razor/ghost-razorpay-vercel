@@ -1,0 +1,63 @@
+{{!-- 
+Simple Payment Button - Add this anywhere in your Ghost theme
+Minimal integration for quick setup
+--}}
+
+<div class="simple-payment-button">
+    <button onclick="handleSimplePayment()" class="pay-now-btn">
+        Subscribe Now - ₹1,000
+    </button>
+</div>
+
+<style>
+.simple-payment-button {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.pay-now-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pay-now-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+</style>
+
+<script>
+function handleSimplePayment() {
+    // Prompt for email if not provided
+    const email = prompt('Please enter your email address:');
+    if (!email) {
+        alert('Email is required for payment processing.');
+        return;
+    }
+    
+    const name = prompt('Please enter your name (optional):') || '';
+    
+    // Initialize integration if not already done
+    if (!window.ghostRazorpayIntegration) {
+        setupGhostRazorpayIntegration({
+            apiBaseUrl: 'YOUR_VERCEL_DEPLOYMENT_URL', // Replace with your actual URL
+            defaultAmount: 100000, // ₹1,000 in paise
+            defaultCurrency: 'INR',
+            membershipTier: 'basic',
+            successRedirectUrl: window.location.origin + '/thank-you',
+            cancelRedirectUrl: window.location.origin
+        });
+    }
+    
+    // Start payment process
+    initializeGhostRazorpayPayment(email, name, 100000, 'INR');
+}
+</script>
