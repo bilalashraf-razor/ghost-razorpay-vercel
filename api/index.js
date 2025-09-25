@@ -8,20 +8,37 @@ const app = express();
 
 // CORS Configuration
 const corsOptions = {
-  origin: true, // Allow all origins for now (you can restrict this later)
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    // Allow all origins for now
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: false, // Set to false to avoid CORS issues with credentials
   optionsSuccessStatus: 200
 };
+
+// Manual CORS middleware as fallback
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
 
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -41,6 +58,16 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Ghost-Razorpay Integration Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// CORS test endpoint
+app.get('/api/test-cors', (req, res) => {
+  res.json({
+    message: 'CORS test successful',
+    headers: req.headers,
+    origin: req.get('origin') || 'no-origin',
     timestamp: new Date().toISOString()
   });
 });

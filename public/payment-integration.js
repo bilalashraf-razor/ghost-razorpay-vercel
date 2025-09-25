@@ -40,8 +40,11 @@ class GhostRazorpayIntegration {
       // Create order on backend
       const orderResponse = await fetch(`${this.apiBaseUrl}/api/create-order`, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           amount: amount || this.defaultAmount,
@@ -105,8 +108,11 @@ class GhostRazorpayIntegration {
 
       const verifyResponse = await fetch(`${this.apiBaseUrl}/api/verify-payment`, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           razorpay_order_id: razorpayResponse.razorpay_order_id,
