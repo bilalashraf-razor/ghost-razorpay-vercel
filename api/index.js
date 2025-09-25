@@ -36,10 +36,12 @@ module.exports = (req, res) => {
     <div class="endpoint">POST /api/webhook - Webhook handler</div>
     <h2>🔧 Environment Status</h2>
     <ul>
-        <li>Ghost URL: ${process.env.GHOST_URL ? 'Set ✅' : 'Missing ❌'}</li>
+        <li>Ghost URL: ${process.env.GHOST_URL || 'Missing ❌'}</li>
         <li>Ghost API Key: ${process.env.GHOST_ADMIN_API_KEY ? 'Set ✅' : 'Missing ❌'}</li>
         <li>Webhook Secret: ${process.env.RAZORPAY_WEBHOOK_SECRET ? 'Set ✅' : 'Missing ❌'}</li>
     </ul>
+    <h2>🔗 Test Links</h2>
+    <p><a href="/api/test-ghost" style="color: #007cba;">Test Ghost API Connection</a></p>
     <h2>🔗 Configuration</h2>
     <p><strong>Webhook URL for Razorpay:</strong></p>
     <div class="endpoint">${req.headers.host ? `https://${req.headers.host}/api/webhook` : 'https://your-deployment-url.vercel.app/api/webhook'}</div>
@@ -61,7 +63,7 @@ module.exports = (req, res) => {
       ],
       timestamp: new Date().toISOString(),
       environment: {
-        ghostUrl: process.env.GHOST_URL ? 'Set ✅' : 'Missing ❌',
+        ghostUrl: process.env.GHOST_URL || 'Missing ❌',
         ghostApiKey: process.env.GHOST_ADMIN_API_KEY ? 'Set ✅' : 'Missing ❌',
         webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET ? 'Set ✅' : 'Missing ❌'
       }

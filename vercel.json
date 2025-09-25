@@ -22,6 +22,10 @@
     {
       "src": "/webhook",
       "dest": "/api/webhook"
+    },
+    {
+      "src": "/test-ghost",
+      "dest": "/api/test-ghost"
     }
   ]
 }
