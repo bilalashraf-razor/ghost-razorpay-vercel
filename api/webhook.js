@@ -18,9 +18,10 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  console.log('Webhook received');
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
+  console.log('🔔 Webhook received');
+  console.log('📋 Headers:', req.headers);
+  console.log('📦 Body:', JSON.stringify(req.body, null, 2));
+  console.log('🔐 Webhook secret exists:', !!webhookSecret);
 
   try {
     const webhookSignature = req.headers['x-razorpay-signature'];
