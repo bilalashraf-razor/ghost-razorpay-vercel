@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Payment Button</title>
+</head>
+<body>
+    <h2>Ghost Razorpay Payment Debug</h2>
+    
+    <!-- Replace YOUR_VERCEL_URL with your actual Vercel deployment URL -->
+    <script src="https://YOUR_VERCEL_URL.vercel.app/payment-integration.js"></script>
+    
+    <div class="simple-payment-button">
+        <button onclick="handleDebugPayment()" class="pay-now-btn">
+            Debug Payment - ₹1,000
+        </button>
+    </div>
+
+    <div id="debug-output" style="margin-top: 20px; padding: 20px; background: #f0f0f0; border-radius: 5px;">
+        <h3>Debug Output:</h3>
+        <div id="debug-log"></div>
+    </div>
+
+    <style>
+    .simple-payment-button {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .pay-now-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .pay-now-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    </style>
+
+    <script>
+    function log(message) {
+        console.log(message);
+        const logDiv = document.getElementById('debug-log');
+        logDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+    }
+
+    function handleDebugPayment() {
+        log('Payment button clicked');
+        
+        // Check if integration script loaded
+        if (typeof setupGhostRazorpayIntegration === 'undefined') {
+            log('ERROR: Integration script not loaded. Check if your Vercel URL is correct.');
+            return;
+        }
+        log('✓ Integration script loaded successfully');
+        
+        // Get user details
+        const email = prompt('Please enter your email address:');
+        if (!email) {
+            log('ERROR: No email provided');
+            alert('Email is required for payment processing.');
+            return;
+        }
+        log('✓ Email provided: ' + email);
+        
+        const name = prompt('Please enter your name (optional):') || '';
+        log('✓ Name provided: ' + (name || 'None'));
+        
+        // Test API endpoint first
+        const apiUrl = 'https://YOUR_VERCEL_URL.vercel.app'; // Replace with your URL
+        log('Testing API endpoint: ' + apiUrl + '/api/health');
+        
+        fetch(apiUrl + '/api/health')
+            .then(response => {
+                log('✓ API health check response: ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                log('✓ API health check data: ' + JSON.stringify(data));
+                
+                // Initialize integration
+                log('Initializing payment integration...');
+                setupGhostRazorpayIntegration({
+                    apiBaseUrl: apiUrl,
+                    defaultAmount: 100000, // ₹1,000 in paise
+                    defaultCurrency: 'INR',
+                    membershipTier: 'basic',
+                    successRedirectUrl: window.location.origin + '/thank-you',
+                    cancelRedirectUrl: window.location.origin
+                });
+                log('✓ Integration initialized');
+                
+                // Start payment process
+                log('Starting payment process...');
+                initializeGhostRazorpayPayment(email, name, 100000, 'INR');
+                
+            })
+            .catch(error => {
+                log('ERROR: API health check failed: ' + error.message);
+                log('Make sure your Vercel URL is correct and the API is deployed');
+            });
+    }
+
+    // Test script loading on page load
+    window.addEventListener('load', function() {
+        log('Page loaded');
+        
+        // Test if script loaded
+        setTimeout(function() {
+            if (typeof setupGhostRazorpayIntegration === 'undefined') {
+                log('WARNING: Integration script did not load after 2 seconds');
+                log('Check if your Vercel URL in the script tag is correct');
+            } else {
+                log('✓ Integration script loaded successfully');
+            }
+        }, 2000);
+    });
+    </script>
+</body>
+</html>

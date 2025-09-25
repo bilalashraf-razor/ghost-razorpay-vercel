@@ -6,10 +6,22 @@ const GhostAdminAPI = require('@tryghost/admin-api');
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+  origin: true, // Allow all origins for now (you can restrict this later)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Initialize Razorpay
 const razorpay = new Razorpay({

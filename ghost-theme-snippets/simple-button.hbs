@@ -48,7 +48,7 @@ function handleSimplePayment() {
     // Initialize integration if not already done
     if (!window.ghostRazorpayIntegration) {
         setupGhostRazorpayIntegration({
-            apiBaseUrl: 'YOUR_VERCEL_DEPLOYMENT_URL', // Replace with your actual URL
+            apiBaseUrl: 'https://ghost-razorpay-vercel.vercel.app', // Your Vercel deployment URL
             defaultAmount: 100000, // ₹1,000 in paise
             defaultCurrency: 'INR',
             membershipTier: 'basic',

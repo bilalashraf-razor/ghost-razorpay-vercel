@@ -106,7 +106,7 @@ Add this to your Ghost theme where you want the payment button to appear
 document.addEventListener('DOMContentLoaded', function() {
     // Configure the integration
     setupGhostRazorpayIntegration({
-        apiBaseUrl: 'YOUR_VERCEL_DEPLOYMENT_URL', // Replace with your Vercel deployment URL
+        apiBaseUrl: 'https://ghost-razorpay-vercel.vercel.app', // Your Vercel deployment URL
         defaultAmount: 100000, // Default amount in smallest currency unit (1000 INR = 100000 paise)
         defaultCurrency: 'INR',
         membershipTier: 'basic',
