@@ -1,4 +1,24 @@
 {
-  "buildCommand": "echo 'No build needed'",
-  "outputDirectory": "public"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/webhook/razorpay",
+      "dest": "/api/webhook/razorpay"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/health"
+    }
+  ],
+  "env": {
+    "GHOST_ADMIN_API_URL": "@ghost_admin_api_url",
+    "GHOST_ADMIN_API_KEY": "@ghost_admin_api_key",
+    "RAZORPAY_WEBHOOK_SECRET": "@razorpay_webhook_secret"
+  }
 }

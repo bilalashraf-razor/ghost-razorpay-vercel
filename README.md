@@ -1,284 +1,264 @@
-# Ghost + Razorpay Payment Button Integration
+# Ghost-Razorpay Integration
 
-A **simple serverless webhook handler** for integrating Razorpay payment buttons with Ghost CMS. No complex frontend code required!
+This Node.js application integrates Razorpay payments with Ghost CMS membership system. When users make payments through your Razorpay payment button, this service automatically creates or updates their membership in Ghost.
 
-## 🚀 Features
+## Features
 
-- **Ultra Simple**: Uses Razorpay's payment button - no custom JavaScript needed
-- **Serverless**: Optimized for Vercel deployment
-- **Automatic**: Creates Ghost members automatically when payments are received
-- **Secure**: Webhook signature verification for safety
-- **Responsive**: Razorpay's button works perfectly on all devices
-- **Zero Maintenance**: No complex payment flow to maintain
+- ✅ Webhook handler for Razorpay payment events
+- ✅ Automatic Ghost member creation/update
+- ✅ Secure webhook signature verification
+- ✅ Support for multiple payment tiers
+- ✅ Comprehensive error handling and logging
+- ✅ Health check endpoint for monitoring
 
-## 📋 Prerequisites
+## Prerequisites
 
-1. **Razorpay Account**: [Sign up at Razorpay](https://razorpay.com/)
-2. **Ghost Website**: Self-hosted or Ghost Pro
-3. **Vercel Account**: [Sign up at Vercel](https://vercel.com/)
+1. **Ghost CMS** with Admin API access
+2. **Razorpay** account with payment button configured
+3. **Node.js** (v14 or higher)
+4. **Public server** or tunnel service (for webhook endpoint)
 
-## 🛠 Quick Setup (3 Minutes)
+## Setup Instructions
 
-### Step 1: Deploy to Vercel
+### 1. Clone and Install Dependencies
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/ghost-razorpay-vercel)
+```bash
+cd /path/to/ghost-rzp
+npm install
+```
 
-Or manually:
-1. Fork/clone this repository
-2. Connect your GitHub repo to Vercel
-3. Deploy to Vercel
+### 2. Environment Configuration
 
-### Step 2: Configure Environment Variables
+Copy the configuration template:
+```bash
+cp config.env.template .env
+```
 
-In your Vercel dashboard, add these environment variables:
+Edit `.env` with your actual values:
 
 ```env
-# Ghost Configuration  
-GHOST_URL=https://your-ghost-site.com
-GHOST_ADMIN_API_KEY=your_ghost_admin_api_key
+# Server Configuration
+PORT=3000
 
-# Razorpay Webhook
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_from_razorpay
+# Ghost Admin API Configuration
+GHOST_ADMIN_API_URL=https://your-ghost-site.com/ghost/api/admin
+GHOST_ADMIN_API_KEY=your_admin_api_key_here
+
+# Razorpay Configuration
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_here
 ```
 
-### Step 3: Create Razorpay Payment Button
+### 3. Get Ghost Admin API Key
 
-1. Go to Razorpay Dashboard → **Payment Button**
-2. **Create New Payment Button** with your desired amount
-3. **Important Settings**:
-   - ✅ Enable "Collect customer details"
-   - ✅ Enable "Email" collection
-   - ✅ Enable "Send receipt to customer"
-4. **Copy** your payment button ID (e.g., `pl_xxxxxxxxx`)
+1. Go to your Ghost Admin panel → Settings → Integrations
+2. Click "Add custom integration"
+3. Name it "Razorpay Integration"
+4. Copy the Admin API Key (format: `id:secret`)
+5. Add it to your `.env` file
 
-### Step 4: Setup Webhook
+### 4. Configure Razorpay Webhook
 
-1. Go to Razorpay Dashboard → **Settings** → **Webhooks**
-2. **Add webhook URL**: `https://your-vercel-deployment-url.vercel.app/api/webhook`
-3. **Select events**: `payment.captured`
-4. **Save** and copy the webhook secret
-5. **Add** the webhook secret to your Vercel environment variables
+1. Log into your Razorpay Dashboard
+2. Go to Settings → Webhooks
+3. Create a new webhook with URL: `https://your-server.com/webhook/razorpay`
+4. Select these events:
+   - `payment.captured`
+   - `payment.failed` (optional, for logging)
+5. Copy the webhook secret and add it to your `.env` file
 
-### Step 5: Get Ghost API Key
+### 5. Update Your Payment Button
 
-1. Go to Ghost Admin → **Integrations**
-2. **Create** a new custom integration
-3. **Copy** the Admin API Key
-4. **Add** it to your Vercel environment variables
-
-### Step 6: Add Payment Button to Ghost Theme
-
-Add this code to any page in your Ghost theme:
+Modify your Ghost page/post to include user email in the payment button:
 
 ```html
-<div class="razorpay-payment-section">
-    <div class="payment-content">
-        <h3>Subscribe to Premium Content</h3>
-        <p>Support our work and get exclusive access.</p>
-        
-        <!-- Replace pl_RLuBHhoEqDrQTD with your actual payment button ID -->
-        <form>
-            <script 
-                src="https://checkout.razorpay.com/v1/payment-button.js" 
-                data-payment_button_id="pl_RLuBHhoEqDrQTD" 
-                async> 
-            </script> 
-        </form>
-        
-        <p><small>Secure payment powered by Razorpay</small></p>
-    </div>
+<form>
+  <script 
+    src="https://checkout.razorpay.com/v1/payment-button.js" 
+    data-payment_button_id="pl_RLuBHhoEqDrQTD"
+    data-notes.email="{{@member.email}}"
+    data-notes.name="{{@member.name}}"
+    async> 
+  </script> 
+</form>
+```
+
+Or for non-members, use a form to collect email:
+
+```html
+<div id="razorpay-payment">
+  <input type="email" id="user-email" placeholder="Enter your email" required>
+  <button onclick="openRazorpay()">Pay Now</button>
 </div>
 
-<style>
-.razorpay-payment-section {
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 30px;
-    border: 1px solid #e1e8ed;
-    border-radius: 12px;
-    background: #f8f9fa;
-    text-align: center;
+<script>
+function openRazorpay() {
+  const email = document.getElementById('user-email').value;
+  if (!email) {
+    alert('Please enter your email');
+    return;
+  }
+  
+  const options = {
+    "key": "rzp_live_your_key_here", // Your Razorpay key
+    "amount": 50000, // Amount in paisa (500 INR)
+    "currency": "INR",
+    "name": "Your Site Name",
+    "description": "Membership Payment",
+    "prefill": {
+      "email": email
+    },
+    "notes": {
+      "email": email
+    },
+    "handler": function (response) {
+      alert('Payment successful! You will receive access shortly.');
+    }
+  };
+  
+  const rzp = new Razorpay(options);
+  rzp.open();
 }
-
-.payment-content h3 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-}
-
-.payment-content p {
-    color: #666;
-    margin-bottom: 20px;
-}
-</style>
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 ```
 
-**Important**: Replace `pl_RLuBHhoEqDrQTD` with your actual Razorpay payment button ID.
+## Running the Application
 
-## 📁 Project Structure
-
-```
-ghost-razorpay-vercel/
-├── api/
-│   └── index.js                    # Webhook handler
-├── ghost-theme-snippets/
-│   ├── razorpay-button.hbs        # Full payment section
-│   └── simple-razorpay-button.hbs # Minimal button
-├── package.json                    # Dependencies
-├── vercel.json                     # Vercel configuration
-├── environment.example             # Environment variables template
-└── README.md                       # This file
+### Development
+```bash
+npm run dev
 ```
 
-## 🔧 How It Works
-
-1. **Customer** clicks your Razorpay payment button
-2. **Razorpay** handles the entire payment process
-3. **Razorpay** sends a webhook to your Vercel function when payment succeeds
-4. **Your webhook** creates/updates the Ghost member automatically
-5. **Customer** becomes a member and can access premium content
-
-## 📝 Environment Variables
-
-Only **3 variables** needed:
-
-| Variable | Description | Where to Get |
-|----------|-------------|--------------|
-| `GHOST_URL` | Your Ghost site URL | `https://yoursite.com` |
-| `GHOST_ADMIN_API_KEY` | Ghost Admin API key | Ghost Admin → Integrations |
-| `RAZORPAY_WEBHOOK_SECRET` | Webhook secret | Razorpay Dashboard → Webhooks |
-
-## 🧪 Testing
-
-### Test Your API
-Visit: `https://your-vercel-url.vercel.app/api`
-
-You should see:
-```json
-{
-  "status": "OK",
-  "message": "Ghost-Razorpay Webhook Handler (Simple Version)"
-}
+### Production
+```bash
+npm start
 ```
 
-### Test Payment Flow
-1. Add the payment button to a test page
-2. Make a test payment using Razorpay test mode
-3. Check Ghost Admin → Members for the new member
+## Deployment Options
 
-### Razorpay Test Mode
-- Use test credentials in Razorpay Dashboard
-- Test card: `4111 1111 1111 1111`
-- Any future date for expiry
-- Any CVV
+### Option 1: Vercel (Recommended - Free & Easy)
+See [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md) for complete Vercel deployment guide.
 
-## ⚙️ Customization
-
-### Payment Button Styling
-The payment button uses Razorpay's default styling, but you can customize the container:
-
-```css
-/* Customize the button container */
-.razorpay-payment-button {
-    /* Your custom styles */
-}
+**Quick Vercel deployment:**
+```bash
+npm install -g vercel
+vercel login
+vercel
+# Add environment variables in Vercel dashboard
+vercel --prod
 ```
 
-### Member Labels
-Members are automatically tagged with:
-- `paid-member`
-- `razorpay-verified`
+**Benefits:**
+- ✅ Free hosting (100GB bandwidth/month)
+- ✅ Automatic deployments from Git
+- ✅ Global CDN and auto-scaling
+- ✅ Built-in SSL certificates
+- ✅ Easy environment variable management
 
-To customize labels, edit `api/index.js`:
-```javascript
-labels: ['your-custom-label', 'premium-member']
+### Option 2: Railway
+1. Create account at [Railway](https://railway.app)
+2. Connect your repository
+3. Add environment variables in Railway dashboard
+4. Deploy automatically
+
+### Option 2: Heroku
+1. Create Heroku app: `heroku create your-app-name`
+2. Set environment variables: `heroku config:set GHOST_ADMIN_API_URL=...`
+3. Deploy: `git push heroku main`
+
+### Option 3: VPS/DigitalOcean
+1. Set up Node.js on your server
+2. Use PM2 for process management:
+   ```bash
+   npm install -g pm2
+   pm2 start server.js --name ghost-razorpay
+   pm2 startup
+   pm2 save
+   ```
+3. Set up reverse proxy with Nginx
+
+### Option 4: ngrok (Development/Testing)
+```bash
+npm install -g ngrok
+ngrok http 3000
+# Use the ngrok URL for Razorpay webhook
 ```
 
-### Payment Amounts
-Configure different amounts by creating multiple payment buttons in Razorpay Dashboard.
+## API Endpoints
 
-## 🚨 Security
+- **GET** `/health` - Health check
+- **POST** `/webhook/razorpay` - Razorpay webhook handler
 
-- ✅ Webhook signature verification
-- ✅ HTTPS only in production
-- ✅ Environment variables for secrets
-- ✅ Razorpay handles PCI compliance
+## How It Works
 
-## 📱 Mobile Support
+1. User clicks payment button on your Ghost site
+2. User completes payment on Razorpay
+3. Razorpay sends webhook to your server
+4. Server verifies webhook signature
+5. Server creates/updates Ghost member with 'paid-member' label
+6. Member gains access to paid content in Ghost
 
-Razorpay's payment button is fully responsive and supports:
-- Mobile browsers
-- In-app browsers  
-- Touch interactions
-- Indian payment methods (UPI, cards, wallets, etc.)
+## Payment Tiers (Optional)
 
-## 🔍 Troubleshooting
+You can configure different membership tiers based on payment amounts by modifying the `getPaymentTier` function in `services/razorpayService.js`.
 
-### Payment button not showing
-- Check if the script loads without errors
-- Verify your payment button ID is correct
-- Ensure the button is published in Razorpay Dashboard
-
-### Webhook not working
-- Check Vercel function logs
-- Verify webhook URL in Razorpay Dashboard
-- Ensure webhook secret matches environment variable
-- Test webhook endpoint manually
-
-### Ghost member not created
-- Verify Ghost API key has proper permissions
-- Check Ghost URL format (include https://)
-- Ensure customer email is collected by payment button
-
-### Debug Logs
-Check Vercel Dashboard → Functions → View Function Logs
-
-## 🆚 Why This Approach?
-
-| Simple Razorpay Button | Custom Integration |
-|------------------------|-------------------|
-| ✅ No frontend code | ❌ Complex JavaScript |
-| ✅ Mobile optimized | ❌ Mobile testing needed |
-| ✅ PCI compliant | ❌ Compliance complexity |
-| ✅ Battle-tested UI | ❌ Custom UI maintenance |
-| ✅ Zero maintenance | ❌ Regular updates needed |
-
-## 📞 Support
-
-### Getting Help
-1. Check Vercel function logs
-2. Verify Razorpay webhook logs
-3. Test each component individually
-4. Review Ghost member creation logs
+## Troubleshooting
 
 ### Common Issues
-- **Webhook signature mismatch**: Check webhook secret
-- **Member not created**: Verify Ghost API permissions
-- **Button not showing**: Check payment button ID and status
 
-## 🔄 Updates
+1. **Webhook not receiving events**
+   - Check if webhook URL is publicly accessible
+   - Verify webhook secret is correct
+   - Check Razorpay webhook logs
 
-To update:
-1. Pull latest changes from this repository
-2. Redeploy to Vercel
-3. No frontend changes needed!
+2. **Ghost API errors**
+   - Verify Admin API key format
+   - Check Ghost site URL is correct
+   - Ensure API key has proper permissions
 
-## 📄 License
+3. **Member not created**
+   - Check server logs for errors
+   - Verify email is being passed in payment
+   - Check Ghost member creation settings
 
-MIT License - feel free to use for personal and commercial projects.
+### Logs
+Check application logs for detailed error information:
+```bash
+# In development
+npm run dev
+
+# In production with PM2
+pm2 logs ghost-razorpay
+```
+
+## Security Considerations
+
+- Always verify webhook signatures
+- Use HTTPS for webhook endpoints
+- Store API keys securely
+- Implement rate limiting for production
+- Monitor webhook endpoint for suspicious activity
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Support
+
+For issues and questions:
+1. Check the troubleshooting section
+2. Review server logs
+3. Test webhook delivery in Razorpay dashboard
+4. Verify Ghost API connectivity
 
 ---
 
-**Ready to accept payments?** Follow the 3-minute setup above and you'll be collecting payments with automatic Ghost member creation! 🚀
-
-## 🎯 Quick Start Checklist
-
-- [ ] Deploy to Vercel
-- [ ] Add environment variables
-- [ ] Create Razorpay payment button
-- [ ] Setup webhook in Razorpay
-- [ ] Get Ghost API key
-- [ ] Add button to Ghost theme
-- [ ] Test payment flow
-- [ ] Go live!
-
-**Total setup time: ~3 minutes** ⏱️
+**Note**: This integration assumes you're using Ghost's member system. Make sure your Ghost site has membership features enabled.
