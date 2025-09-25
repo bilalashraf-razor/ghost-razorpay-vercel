@@ -5,7 +5,8 @@
 
 class GhostRazorpayIntegration {
   constructor(config) {
-    this.apiBaseUrl = config.apiBaseUrl;
+    // Remove trailing slash from apiBaseUrl to avoid double slashes
+    this.apiBaseUrl = config.apiBaseUrl.replace(/\/$/, '');
     this.defaultAmount = config.defaultAmount || 100000; // 1000 INR in paise
     this.defaultCurrency = config.defaultCurrency || 'INR';
     this.membershipTier = config.membershipTier || 'basic';
