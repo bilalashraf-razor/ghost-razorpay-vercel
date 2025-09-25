@@ -22,6 +22,8 @@ module.exports = async (req, res) => {
   console.log('📋 Headers:', req.headers);
   console.log('📦 Body:', JSON.stringify(req.body, null, 2));
   console.log('🔐 Webhook secret exists:', !!webhookSecret);
+  console.log('🏠 GHOST_URL:', process.env.GHOST_URL);
+  console.log('🔑 GHOST_ADMIN_API_KEY exists:', !!process.env.GHOST_ADMIN_API_KEY);
 
   try {
     const webhookSignature = req.headers['x-razorpay-signature'];

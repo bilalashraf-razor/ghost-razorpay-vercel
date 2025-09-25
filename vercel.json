@@ -24,8 +24,8 @@
       "dest": "/api/webhook"
     },
     {
-      "src": "/test-ghost",
-      "dest": "/api/test-ghost"
+      "src": "/debug",
+      "dest": "/api/debug"
     }
   ]
 }
