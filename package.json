@@ -2,15 +2,10 @@
   "name": "ghost-razorpay-integration",
   "version": "2.0.0",
   "description": "Simple Razorpay payment button webhook handler for Ghost CMS",
-  "main": "api/index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'No build step required'",
-    "start": "node api/index.js"
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
     "@tryghost/admin-api": "^1.13.9"
   },
   "devDependencies": {
