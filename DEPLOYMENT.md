@@ -1,6 +1,6 @@
-# Deployment Guide
+# Deployment Guide (Simple Version)
 
-This guide provides step-by-step instructions for deploying the Ghost-Razorpay integration to Vercel.
+This guide provides step-by-step instructions for deploying the simplified Ghost-Razorpay webhook handler to Vercel.
 
 ## 🚀 One-Click Deployment
 
@@ -59,27 +59,18 @@ vercel env add BASE_URL
 
 ### 4. Required Environment Variables
 
-```env
-# Razorpay (Get from Razorpay Dashboard)
-RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxx
-RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxx
+**Only 3 variables needed:**
 
-# Ghost (Get from Ghost Admin → Integrations)
+```env
+# Ghost Configuration
 GHOST_URL=https://your-ghost-site.com
 GHOST_ADMIN_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxx
-GHOST_CONTENT_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxx
 
-# Webhook (Generate a random secret)
-WEBHOOK_SECRET=your_random_webhook_secret
+# Razorpay Webhook Secret (Get from Razorpay Dashboard → Webhooks)
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_from_razorpay
 
-# Your Vercel deployment URL
+# Optional: Your Vercel deployment URL (for documentation)
 BASE_URL=https://your-project-name.vercel.app
-
-# Optional customizations
-SUCCESS_REDIRECT_URL=https://your-ghost-site.com/thank-you
-CANCEL_REDIRECT_URL=https://your-ghost-site.com/cancelled
-DEFAULT_CURRENCY=INR
-DEFAULT_AMOUNT=100000
 ```
 
 ### 5. Domain Configuration (Optional)
@@ -90,18 +81,26 @@ DEFAULT_AMOUNT=100000
 3. Configure DNS as instructed
 4. Update `BASE_URL` environment variable
 
-### 6. Set Up Razorpay Webhook
+### 6. Set Up Razorpay Payment Button and Webhook
 
+#### Create Payment Button:
 1. Go to [Razorpay Dashboard](https://dashboard.razorpay.com/)
-2. Navigate to Settings → Webhooks
-3. Click "Create New Webhook"
-4. Enter webhook URL: `https://your-vercel-url.vercel.app/api/webhook`
-5. Select events:
-   - `payment.captured`
-   - `payment.failed` 
-   - `order.paid`
-6. Save and copy the webhook secret
-7. Add the secret to your Vercel environment variables
+2. Navigate to **Payment Button**
+3. **Create New Payment Button**
+4. Configure:
+   - Amount and currency
+   - ✅ Enable "Collect customer details"
+   - ✅ Enable "Email" collection
+   - ✅ Enable "Send receipt to customer"
+5. **Save** and copy the payment button ID (e.g., `pl_xxxxxxxxx`)
+
+#### Setup Webhook:
+1. Go to **Settings** → **Webhooks**
+2. Click "Create New Webhook"
+3. Enter webhook URL: `https://your-vercel-url.vercel.app/webhook`
+4. Select events: **`payment.captured`** only
+5. Save and copy the webhook secret
+6. Add the secret to your Vercel environment variables as `RAZORPAY_WEBHOOK_SECRET`
 
 ## 🔧 Advanced Configuration
 
@@ -155,29 +154,32 @@ vercel
 
 ## 🧪 Testing Your Deployment
 
-### 1. Test API Endpoints
+### 1. Test Webhook Endpoint
 
 ```bash
 # Health check
-curl https://your-vercel-url.vercel.app/api/health
-
-# Test order creation (replace with actual values)
-curl -X POST https://your-vercel-url.vercel.app/api/create-order \
-  -H "Content-Type: application/json" \
-  -d '{"amount":100000,"memberEmail":"test@example.com","memberName":"Test User"}'
+curl https://your-vercel-url.vercel.app/
 ```
 
-### 2. Test Frontend Integration
+You should see:
+```json
+{
+  "status": "OK",
+  "message": "Ghost-Razorpay Webhook Handler (Simple Version)"
+}
+```
+
+### 2. Test Payment Button
 
 1. Copy the payment button snippet to your Ghost theme
-2. Replace `YOUR_VERCEL_DEPLOYMENT_URL` with your actual URL
+2. Replace `pl_RLuBHhoEqDrQTD` with your actual payment button ID
 3. Test the payment flow with Razorpay test credentials
 
-### 3. Test Webhook
+### 3. Test Full Flow
 
-1. Make a test payment
+1. Make a test payment using test card: `4111 1111 1111 1111`
 2. Check Vercel function logs for webhook processing
-3. Verify member creation in Ghost Admin
+3. Verify member creation in Ghost Admin → Members
 
 ## 📊 Monitoring
 

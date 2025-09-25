@@ -1,0 +1,9 @@
+# Ghost Configuration
+GHOST_URL=https://your-ghost-site.com
+GHOST_ADMIN_API_KEY=your_ghost_admin_api_key
+
+# Razorpay Webhook Configuration
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_from_razorpay_dashboard
+
+# Optional: Deployment URL (for documentation)
+BASE_URL=https://your-vercel-deployment-url.vercel.app
