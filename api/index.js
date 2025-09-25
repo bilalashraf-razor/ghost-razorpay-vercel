@@ -2,6 +2,8 @@ const express = require('express');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const GhostAdminAPI = require('@tryghost/admin-api');
 
 const app = express();
@@ -53,6 +55,22 @@ const ghostAPI = new GhostAdminAPI({
   version: 'v5.0'
 });
 
+// Root endpoint for the serverless function
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Ghost-Razorpay Integration Server is running',
+    endpoints: [
+      'GET /api/health - Health check',
+      'GET /api/test-cors - CORS test',
+      'POST /api/create-order - Create Razorpay order',
+      'POST /api/verify-payment - Verify payment',
+      'POST /api/webhook - Razorpay webhook handler'
+    ],
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -70,6 +88,25 @@ app.get('/api/test-cors', (req, res) => {
     origin: req.get('origin') || 'no-origin',
     timestamp: new Date().toISOString()
   });
+});
+
+// Serve payment integration script
+app.get('/payment-integration.js', (req, res) => {
+  try {
+    const scriptPath = path.join(__dirname, '..', 'public', 'payment-integration.js');
+    
+    if (fs.existsSync(scriptPath)) {
+      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      const script = fs.readFileSync(scriptPath, 'utf8');
+      res.send(script);
+    } else {
+      res.status(404).json({ error: 'Payment integration script not found' });
+    }
+  } catch (error) {
+    console.error('Error serving payment script:', error);
+    res.status(500).json({ error: 'Failed to serve payment script' });
+  }
 });
 
 // Create Razorpay order
@@ -305,6 +342,23 @@ app.post('/api/webhook', async (req, res) => {
   }
 });
 
+// Catch-all route for undefined endpoints
+app.all('*', (req, res) => {
+  res.status(404).json({
+    error: 'Endpoint not found',
+    path: req.path,
+    method: req.method,
+    availableEndpoints: [
+      'GET / - API info',
+      'GET /api/health - Health check',
+      'GET /api/test-cors - CORS test',
+      'POST /api/create-order - Create Razorpay order',
+      'POST /api/verify-payment - Verify payment',
+      'POST /api/webhook - Razorpay webhook handler'
+    ]
+  });
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error('Unhandled error:', error);
@@ -314,5 +368,5 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Export for Vercel
+// Export for Vercel serverless functions
 module.exports = app;
