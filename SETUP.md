@@ -31,7 +31,7 @@ Add these environment variables in Vercel Dashboard → Settings → Environment
 - [ ] Create new payment button (enable email collection)
 - [ ] Copy your button ID: `pl_xxxxxxxxx`
 - [ ] Go to **Settings** → **Webhooks**
-- [ ] Add webhook: `https://your-vercel-url.vercel.app/webhook`
+- [ ] Add webhook: `https://your-vercel-url.vercel.app/api/webhook`
 - [ ] Select event: `payment.captured`
 - [ ] Copy webhook secret → Add to Vercel environment variables
 
@@ -58,7 +58,7 @@ Add this code where you want the payment button:
 
 ## 🧪 Test It
 
-1. **Visit**: `https://your-vercel-url.vercel.app/` (should show "OK" status)
+1. **Visit**: `https://your-vercel-url.vercel.app/api` (should show "OK" status)
 2. **Test payment** with card: `4111 1111 1111 1111`
 3. **Check** Ghost Admin → Members for new member
 

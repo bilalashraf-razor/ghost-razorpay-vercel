@@ -54,7 +54,7 @@ RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_from_razorpay
 ### Step 4: Setup Webhook
 
 1. Go to Razorpay Dashboard → **Settings** → **Webhooks**
-2. **Add webhook URL**: `https://your-vercel-deployment-url.vercel.app/webhook`
+2. **Add webhook URL**: `https://your-vercel-deployment-url.vercel.app/api/webhook`
 3. **Select events**: `payment.captured`
 4. **Save** and copy the webhook secret
 5. **Add** the webhook secret to your Vercel environment variables
@@ -149,8 +149,8 @@ Only **3 variables** needed:
 
 ## 🧪 Testing
 
-### Test Your Webhook
-Visit: `https://your-vercel-url.vercel.app/`
+### Test Your API
+Visit: `https://your-vercel-url.vercel.app/api`
 
 You should see:
 ```json

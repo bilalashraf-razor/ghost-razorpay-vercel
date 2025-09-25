@@ -97,7 +97,7 @@ BASE_URL=https://your-project-name.vercel.app
 #### Setup Webhook:
 1. Go to **Settings** → **Webhooks**
 2. Click "Create New Webhook"
-3. Enter webhook URL: `https://your-vercel-url.vercel.app/webhook`
+3. Enter webhook URL: `https://your-vercel-url.vercel.app/api/webhook`
 4. Select events: **`payment.captured`** only
 5. Save and copy the webhook secret
 6. Add the secret to your Vercel environment variables as `RAZORPAY_WEBHOOK_SECRET`
@@ -158,7 +158,7 @@ vercel
 
 ```bash
 # Health check
-curl https://your-vercel-url.vercel.app/
+curl https://your-vercel-url.vercel.app/api
 ```
 
 You should see:
