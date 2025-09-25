@@ -6,6 +6,6 @@
     "@tryghost/admin-api": "^1.13.9"
   },
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   }
 }
